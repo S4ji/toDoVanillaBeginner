@@ -13,11 +13,7 @@ function addToDo(form) {
     ]
 }
 
-function addToDom(form) {
-    let formFields = new FormData(form)
-    let toDoObject = Object.fromEntries(formFields)
-    console.log(toDoObject)
-
+function addToDom(toDoObject) {
     toDo = document.createElement('li')
     toDoTitle = toDo.appendChild(document.createElement('h2'))
     toDoDescription = toDo.appendChild(document.createElement('p'))
@@ -43,7 +39,7 @@ myForm.addEventListener('submit', (e) => {
     listContainer.innerHTML = ''
     addToDo(e.target)
     myForm.reset()
-    for (let i = 0; i < toDoList.length; i++) {
-        addToDom(myForm)
-    }
+    toDoList.forEach((element) => {
+        addToDom(element)
+    })
 })
