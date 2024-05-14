@@ -11,9 +11,6 @@ const inputLast = document.getElementById('lasting')
 // VARIABLES
 
 let toDoList = []
-let deleteButton = []
-let editButton = []
-let doneButton = []
 
 // TODO UTILS
 
@@ -26,21 +23,47 @@ function createToDoObject(form) {
             ...Object.fromEntries(formFields),
         },
     ]
+    createTodoDom(Object.fromEntries(formFields), toDoList.length)
 }
 
 function createTodoDom(toDoObject, index) {
     const toDo = document.createElement('li')
-    const toDoTitle = toDo.appendChild(document.createElement('h2'))
-    const toDoDescription = toDo.appendChild(document.createElement('p'))
-    const toDoPriority = toDo.appendChild(document.createElement('p'))
-    const toDoLasting = toDo.appendChild(document.createElement('p'))
 
-    const toDoEditButton = toDo.appendChild(document.createElement('button'))
+    const toDoTitle = document.createElement('h2')
+
+    const toDoDescription = document.createElement('p')
+
+    const toDoPriority = document.createElement('p')
+
+    const toDoLasting = document.createElement('p')
+
+    const toDoEditButton = document.createElement('button')
     toDoEditButton.classList.add('toDoEditButton')
-    const toDoDeleteButton = toDo.appendChild(document.createElement('button'))
+    toDoEditButton.addEventListener('click', (event) => {
+        editTodo(index)
+    })
+
+    const toDoDeleteButton = document.createElement('button')
     toDoDeleteButton.classList.add('toDoDeleteButton')
-    const toDoDoneButton = toDo.appendChild(document.createElement('button'))
+    toDoDeleteButton.addEventListener('click', (event) => {
+        deleteTodo(index)
+    })
+
+    const toDoDoneButton = document.createElement('button')
     toDoDoneButton.classList.add('toDoDoneButton')
+    toDoDoneButton.addEventListener('click', (event) => {
+        console.log('done')
+    })
+
+    toDo.append(
+        toDoTitle,
+        toDoDescription,
+        toDoPriority,
+        toDoLasting,
+        toDoDeleteButton,
+        toDoEditButton,
+        toDoDoneButton
+    )
 
     toDoTitle.innerText = toDoObject.title
     toDoDescription.innerText = toDoObject.description
@@ -59,36 +82,12 @@ function updateToDoListOnDom() {
     toDoList.forEach((toDo, index) => {
         createTodoDom(toDo, index)
     })
-    deleteButton = Array.from(
-        document.getElementsByClassName('toDoDeleteButton')
-    )
-    editButton = Array.from(document.getElementsByClassName('toDoEditButton'))
-
-    doneButton = Array.from(document.getElementsByClassName('toDoDoneButton'))
-
-    deleteButton.forEach((element, index) => {
-        element.addEventListener('click', (event) => {
-            deleteTodo(index)
-        })
-    })
-
-    editButton.forEach((element, index) => {
-        element.addEventListener('click', (event) => {
-            editTodo(index)
-        })
-    })
-
-    doneButton.forEach((element) => {
-        element.addEventListener('click', (event) => {
-            console.log('done')
-        })
-    })
 }
 
 // CRUD TODO
 
 function deleteTodo(indexToDelete) {
-    for (let i = 0; i < deleteButton.length; i++) {
+    for (let i = 0; i < toDoList.length; i++) {
         if (indexToDelete === i) {
             toDoList = [
                 ...toDoList.slice(0, indexToDelete),
@@ -100,7 +99,7 @@ function deleteTodo(indexToDelete) {
 }
 
 function editTodo(indexToEdit) {
-    for (let i = 0; i < editButton.length; i++) {
+    for (let i = 0; i < toDoList.length; i++) {
         if (indexToEdit === i) {
             inputTitle.value = toDoList[i].title
             inputDescription.value = toDoList[i].description
@@ -120,5 +119,4 @@ myForm.addEventListener('submit', (e) => {
     e.preventDefault()
     createToDoObject(e.target)
     myForm.reset()
-    updateToDoListOnDom()
 })
