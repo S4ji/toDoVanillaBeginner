@@ -8,51 +8,57 @@
         <title>ToDoList</title>
     </head>
     <body>
-        <h1 class="">To Do List</h1>
-
-        <form id="myForm" class="">
-            <div class="">
-                <label for="title">Title:</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    placeholder="Enter task title"
-                />
-            </div>
-            <div class="">
-                <label class="block mb-2" for="description">Description:</label>
-                <textarea
-                    class=""
-                    id="description"
-                    name="description"
-                    rows="4"
-                    placeholder="Describe the task"
-                ></textarea>
-            </div>
-            <div>
-                <label for="priority" class="block mb-2">Priority</label>
-                <select name="priority" id="priority" class="">
-                    <option value="0">0</option>
-                    <option value="1">Non-Urgent</option>
-                    <option value="2">Moyenne</option>
-                    <option value="3">Urgent</option>
-                </select>
-            </div>
-            <div class="">
-                <label for="lasting">Lasting:</label>
-                <input
-                    type="text"
-                    id="lasting"
-                    name="lasting"
-                    placeholder="Estimated time (e.g., 1 hour)"
-                />
-            </div>
-            <br />
-            <button type="submit">Submit Task</button>
-        </form>
-        <button id="test">Bouton de Test</button>
-        <ul id="listContainer"></ul>
+        <main class="">
+            <h1 class="">To Do List</h1>
+            <button id="toggleFormButton">Add To Do</button>
+            <ul
+                id="listContainer"
+                class="grid grid-cols-1 md:grid-cols-3 overflow-y-scroll"
+            ></ul>
+            <form id="myForm" class="hidden">
+                <div class="">
+                    <label for="title">Title:</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="Enter task title"
+                    />
+                </div>
+                <div class="">
+                    <label class="block mb-2" for="description"
+                        >Description:</label
+                    >
+                    <textarea
+                        class=""
+                        id="description"
+                        name="description"
+                        rows="4"
+                        placeholder="Describe the task"
+                    ></textarea>
+                </div>
+                <div>
+                    <label for="priority" class="block mb-2">Priority</label>
+                    <select name="priority" id="priority" class="">
+                        <option value="0">0</option>
+                        <option value="1">Non-Urgent</option>
+                        <option value="2">Moyenne</option>
+                        <option value="3">Urgent</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label for="lasting">Lasting:</label>
+                    <input
+                        type="text"
+                        id="lasting"
+                        name="lasting"
+                        placeholder="Estimated time (e.g., 1 hour)"
+                    />
+                </div>
+                <br />
+                <button type="submit">Submit Task</button>
+            </form>
+        </main>
     </body>
     <script src="./script.js"></script>
 </html>
