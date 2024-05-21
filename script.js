@@ -3,41 +3,35 @@
 const listContainer = document.getElementById('listContainer')
 const testButton = document.getElementById('test')
 const myForm = document.getElementById('myForm')
-const inputTitle = document.getElementById('title')
-const inputDescription = document.getElementById('description')
-const inputPriority = document.getElementById('priority')
-const inputLast = document.getElementById('lasting')
+let inputTitle = document.getElementById('title')
+let inputDescription = document.getElementById('description')
+let inputPriority = document.getElementById('priority')
+let inputLast = document.getElementById('lasting')
 
 // VARIABLES
 
 let toDoList = []
 
-// TODO UTILS
-
-function createToDoObject(form) {
-    let formFields = new FormData(form)
-    toDoList = [
-        ...toDoList,
-        {
-            isDone: false,
-            ...Object.fromEntries(formFields),
-        },
-    ]
-    createTodoDom(Object.fromEntries(formFields), toDoList.length)
+//LOCAL STORAGE
+function loadLocalStorage() {
+    toDoList = JSON.parse(localStorage.getItem('toDoList')) || []
 }
+function saveToStorage() {
+    localStorage.setItem('toDoList', JSON.stringify(toDoList))
+    console.log(JSON.stringify(localStorage))
+}
+
+// TODO UTILS
 
 function createTodoDom(toDoObject, index) {
     const toDo = document.createElement('li')
-
     const toDoTitle = document.createElement('h2')
-
+    const toDoId = document.createElement('p')
     const toDoDescription = document.createElement('p')
-
     const toDoPriority = document.createElement('p')
-
     const toDoLasting = document.createElement('p')
-
     const toDoEditButton = document.createElement('button')
+
     toDoEditButton.classList.add('toDoEditButton')
     toDoEditButton.addEventListener('click', (event) => {
         editTodo(index)
@@ -51,12 +45,16 @@ function createTodoDom(toDoObject, index) {
 
     const toDoDoneButton = document.createElement('button')
     toDoDoneButton.classList.add('toDoDoneButton')
+
     toDoDoneButton.addEventListener('click', (event) => {
-        console.log('done')
+        updateToDo(myForm, index)
     })
+
+    toDo.setAttribute('data-index', index)
 
     toDo.append(
         toDoTitle,
+        toDoId,
         toDoDescription,
         toDoPriority,
         toDoLasting,
@@ -65,6 +63,7 @@ function createTodoDom(toDoObject, index) {
         toDoDoneButton
     )
 
+    toDoId.innerText = toDoObject.id
     toDoTitle.innerText = toDoObject.title
     toDoDescription.innerText = toDoObject.description
     toDoPriority.innerText = toDoObject.priority
@@ -72,30 +71,15 @@ function createTodoDom(toDoObject, index) {
     toDoEditButton.innerText = 'Edit'
     toDoDeleteButton.innerText = 'Delete'
     toDoDoneButton.innerText = 'Done'
-
-    toDo.setAttribute('data-index', index)
     listContainer.appendChild(toDo)
 }
 
 function updateToDoListOnDom() {
     listContainer.innerHTML = ''
+    loadLocalStorage()
     toDoList.forEach((toDo, index) => {
         createTodoDom(toDo, index)
     })
-}
-
-// CRUD TODO
-
-function deleteTodo(indexToDelete) {
-    for (let i = 0; i < toDoList.length; i++) {
-        if (indexToDelete === i) {
-            toDoList = [
-                ...toDoList.slice(0, indexToDelete),
-                ...toDoList.slice(indexToDelete + 1),
-            ]
-        }
-    }
-    updateToDoListOnDom()
 }
 
 function editTodo(indexToEdit) {
@@ -105,8 +89,54 @@ function editTodo(indexToEdit) {
             inputDescription.value = toDoList[i].description
             inputPriority.value = toDoList[i].priority
             inputLast.value = toDoList[i].lasting
+            toDoList[i].isEdit = true
+            console.log()
+            console.log(toDoList[indexToEdit])
         }
     }
+}
+
+// CRUD TODO
+function createToDoObject(form) {
+    let formFields = new FormData(form)
+
+    toDoList = [
+        ...toDoList,
+        {
+            id: Date.now(),
+            isEdit: false,
+            isDone: false,
+            ...Object.fromEntries(formFields),
+        },
+    ]
+    createTodoDom(Object.fromEntries(formFields), toDoList.length)
+    saveToStorage()
+    updateToDoListOnDom()
+}
+
+function updateToDo(form, targetToDoIndex) {
+    let formFields = new FormData(form)
+    toDoList = [
+        ...toDoList.slice(0, targetToDoIndex),
+        Object.fromEntries(formFields),
+        ...toDoList.slice(targetToDoIndex + 1),
+    ]
+    updateToDoListOnDom()
+}
+
+function deleteTodo(indexToDelete) {
+    for (let i = 0; i < toDoList.length; i++) {
+        if (indexToDelete === i) {
+            toDoList = [
+                ...toDoList.slice(0, indexToDelete),
+                ...toDoList.slice(indexToDelete + 1),
+            ]
+            console.log(indexToDelete)
+            console.log(toDoList)
+        }
+    }
+    saveToStorage()
+    updateToDoListOnDom()
 }
 
 // EVENT LISTENER
@@ -117,6 +147,9 @@ testButton.addEventListener('click', (event) => {
 
 myForm.addEventListener('submit', (e) => {
     e.preventDefault()
+    updateToDoListOnDom()
     createToDoObject(e.target)
     myForm.reset()
 })
+
+updateToDoListOnDom()
