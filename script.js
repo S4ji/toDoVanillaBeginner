@@ -12,6 +12,7 @@ let inputLast = document.getElementById('lasting')
 // VARIABLES
 
 let toDoList = []
+let editingTodo = {}
 
 //LOCAL STORAGE
 function loadLocalStorage() {
@@ -24,7 +25,7 @@ function saveToStorage() {
 
 // TODO UTILS
 
-function createTodoDom(toDoObject, index) {
+function createTodoDom(toDoObject) {
     const toDo = document.createElement('li')
     toDo.classList.add('bg-yellow-100', 'shadow-lg', 'p-8', 'm-3')
 
@@ -37,23 +38,23 @@ function createTodoDom(toDoObject, index) {
 
     toDoEditButton.classList.add('toDoEditButton', 'hover:bg-yellow-700', 'm-2')
     toDoEditButton.addEventListener('click', (event) => {
-        editTodo(index)
+        editTodo(toDoObject.id)
     })
 
     const toDoDeleteButton = document.createElement('button')
     toDoDeleteButton.classList.add('toDoDeleteButton', 'hover:bg-yellow-700')
     toDoDeleteButton.addEventListener('click', (event) => {
-        deleteTodo(index)
+        deleteTodo(toDoObject.id)
     })
 
     const toDoDoneButton = document.createElement('button')
     toDoDoneButton.classList.add('toDoDoneButton', 'hover:bg-yellow-700')
 
     toDoDoneButton.addEventListener('click', (event) => {
-        updateToDo(myForm, index)
+        console.log('done button')
     })
 
-    toDo.setAttribute('data-index', index)
+    toDo.setAttribute('data-id', toDoObject.id)
 
     toDo.append(
         toDoTitle,
@@ -77,89 +78,96 @@ function createTodoDom(toDoObject, index) {
     listContainer.appendChild(toDo)
 }
 
-function updateToDoListOnDom() {
-    listContainer.innerHTML = ''
-    loadLocalStorage()
-    toDoList.forEach((toDo, index) => {
-        createTodoDom(toDo, index)
-    })
-}
+function editTodo(id) {
+    index = toDoList.findIndex((toDo) => toDo.id === id)
 
-function editTodo(indexToEdit) {
-    for (let i = 0; i < toDoList.length; i++) {
-        if (indexToEdit === i) {
-            inputTitle.value = toDoList[i].title
-            inputDescription.value = toDoList[i].description
-            inputPriority.value = toDoList[i].priority
-            inputLast.value = toDoList[i].lasting
-            toDoList[i].isEdit = true
-            console.log()
-            console.log(toDoList[indexToEdit])
-        }
-    }
+    inputTitle.value = toDoList[index].title
+    inputDescription.value = toDoList[index].description
+    inputPriority.value = toDoList[index].priority
+    inputLast.value = toDoList[index].lasting
+    toDoList[index].isEdit = true
+
+    editingTodo = toDoList[index]
+
+    console.log(editingTodo)
 }
 
 function toggleHiddenClass() {
     myForm.classList.toggle('hidden')
     listContainer.classList.toggle('hidden')
 }
+function updateToDoListOnDom() {
+    listContainer.innerHTML = ''
+    toDoList.forEach((toDo, index) => {
+        createTodoDom(toDo, index)
+    })
+}
 
 // CRUD TODO
 function createToDoObject(form) {
     let formFields = new FormData(form)
+    let newTodo = {
+        id: Date.now(),
+        isEdit: false,
+        isDone: false,
+        ...Object.fromEntries(formFields),
+    }
 
+    toDoList = [...toDoList, newTodo]
+    createTodoDom(newTodo, toDoList.length - 1)
+    saveToStorage()
+}
+
+function updateToDo(form) {
+    let formFields = new FormData(form)
+    index = toDoList.findIndex((toDo) => toDo.id === editingTodo.id)
     toDoList = [
-        ...toDoList,
+        ...toDoList.slice(0, index),
         {
-            id: Date.now(),
-            isEdit: false,
-            isDone: false,
+            isDone: editingTodo.isDone,
+            isEdit: editingTodo.isEdit,
+            id: editingTodo.id,
             ...Object.fromEntries(formFields),
         },
+        ...toDoList.slice(index + 1),
     ]
-    createTodoDom(Object.fromEntries(formFields), toDoList.length)
     saveToStorage()
+    editingTodo = {}
+    console.log(toDoList)
     updateToDoListOnDom()
 }
 
-function updateToDo(form, targetToDoIndex) {
-    let formFields = new FormData(form)
-    toDoList = [
-        ...toDoList.slice(0, targetToDoIndex),
-        Object.fromEntries(formFields),
-        ...toDoList.slice(targetToDoIndex + 1),
-    ]
-    updateToDoListOnDom()
-}
-
-function deleteTodo(indexToDelete) {
-    for (let i = 0; i < toDoList.length; i++) {
-        if (indexToDelete === i) {
-            toDoList = [
-                ...toDoList.slice(0, indexToDelete),
-                ...toDoList.slice(indexToDelete + 1),
-            ]
-            console.log(indexToDelete)
-            console.log(toDoList)
-        }
-    }
+function deleteTodo(id) {
+    index = toDoList.findIndex((toDo) => toDo.id === id)
+    const todoToRemove = document.querySelector(
+        `[data-id="${toDoList[index].id}"]`
+    )
+    toDoList = [...toDoList.slice(0, index), ...toDoList.slice(index + 1)]
     saveToStorage()
-    updateToDoListOnDom()
+    todoToRemove.remove()
 }
 
 // EVENT LISTENER
 
 toggleFormButton.addEventListener('click', (event) => {
-    toggleHiddenClass()
+    // toggleHiddenClass()
     formMode = true
 })
 
 myForm.addEventListener('submit', (e) => {
     e.preventDefault()
-    updateToDoListOnDom()
-    createToDoObject(e.target)
+    if (editingTodo.isEdit === true) {
+        console.log(editingTodo)
+        updateToDo(e.target)
+        myForm.reset()
+    } else createToDoObject(e.target)
     myForm.reset()
-    toggleHiddenClass()
+    // toggleHiddenClass()
 })
 
-updateToDoListOnDom()
+document.addEventListener('DOMContentLoaded', (event) => {
+    loadLocalStorage()
+    updateToDoListOnDom()
+})
+
+console.log(editingTodo)
